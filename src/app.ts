@@ -6,6 +6,7 @@ import * as expressWinston from 'express-winston';
 import cors from 'cors';
 import {RoutesConfig} from './route/RoutesConfig';
 import debug from 'debug';
+import {UserRoutesConfig} from "./route/UserRoutesConfig";
 
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
@@ -26,6 +27,7 @@ app.use(expressWinston.logger({
 }));
 
 // push route configurations to route
+routes.push(new UserRoutesConfig(app, 'userRoutes'));
 
 // simple route to make sure everything is working
 const runningMessage = `Server running at http://localhost:${port}`;
