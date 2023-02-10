@@ -8,7 +8,6 @@ export abstract class RoutesConfig {
 		this.app = app;
 		this.name = name;
 		this.configureRoutes();
-		console.log('lol');
 	}
 
 	getName() {
