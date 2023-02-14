@@ -24,6 +24,26 @@ export const remove: Handler = async (req, res) => {
 	res.status(200).send('deleted');
 };
 
+export const getFollowers: Handler = async (req, res) => {
+	res.status(200).send('followers');
+};
+
+export const getFollowing: Handler = async (req, res) => {
+	res.status(200).send('following');
+};
+
+export const follow: Handler = async (req, res) => {
+	res.status(200).send('follow');
+};
+
+export const unfollow: Handler = async (req, res) => {
+	res.status(200).send('unfollow');
+};
+
+export const getFeed: Handler = async (req, res) => {
+	res.status(200).send('feed');
+};
+
 export default {
 	getProfile,
 	login,
@@ -31,4 +51,9 @@ export default {
 	register,
 	update,
 	remove,
+	getFollowers,
+	getFollowing,
+	follow,
+	unfollow,
+	getFeed,
 };

@@ -7,6 +7,8 @@ import cors from 'cors';
 import { RoutesConfig } from './route/RoutesConfig';
 import debug from 'debug';
 import { UserRoutesConfig } from './route/UserRoutesConfig';
+import { ReviewRoutesConfig } from './route/ReviewRoutesConfig';
+import { MovieRoutesConfig } from './route/MovieRoutesConfig';
 
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
@@ -29,7 +31,11 @@ app.use(
 );
 
 // push route configurations to route
-routes.push(new UserRoutesConfig(app, 'userRoutes'));
+routes.push(
+	new UserRoutesConfig(app),
+	new ReviewRoutesConfig(app),
+	new MovieRoutesConfig(app)
+);
 
 // simple route to make sure everything is working
 const runningMessage = `Server running at http://localhost:${port}`;
