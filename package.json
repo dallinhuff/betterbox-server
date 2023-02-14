@@ -21,11 +21,6 @@
 		"url": "https://gitlab.com/betterbox/server/issues"
 	},
 	"homepage": "https://gitlab.com/betterbox/server#readme",
-	"husky": {
-		"hooks": {
-			"pre-push": "npm run test"
-		}
-	},
 	"dependencies": {
 		"cors": "^2.8.5",
 		"debug": "^4.3.4",
