@@ -12,7 +12,7 @@ import { MovieRoutesConfig } from './route/MovieRoutesConfig';
 
 const app: express.Application = express();
 const server: http.Server = http.createServer(app);
-const port = 3000;
+const port = parseInt(process.env.APP_PORT);
 const routes: Array<RoutesConfig> = [];
 const debugLog: debug.IDebugger = debug('app');
 
