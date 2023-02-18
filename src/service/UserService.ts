@@ -36,4 +36,29 @@ export class UserService extends Service {
 			};
 		}
 	}
+	async login(user: string, password: string): Promise<RegisterResponse> {
+		const dao = new UserDao();
+		try {
+			const responseUser = await dao.find(user);
+			if (responseUser.password === password) {
+				return {
+					success: true,
+					status: 200,
+					user: responseUser,
+				};
+			} else {
+				return {
+					success: false,
+					status: 401,
+					error: `Unauthorized`,
+				};
+			}
+		} catch (e) {
+			return {
+				success: false,
+				status: 500,
+				error: `Internal server error: ${e}`,
+			};
+		}
+	}
 }
