@@ -6,7 +6,10 @@ export const getProfile: Handler = async (req, res) => {
 };
 
 export const login: Handler = async (req, res) => {
-	res.status(200).send('logged in');
+	const username = req.body.username;
+	const password = req.body.password;
+	const response = await new UserService().login(username, password);
+	res.status(200).send(response);
 };
 
 export const logout: Handler = async (req, res) => {
