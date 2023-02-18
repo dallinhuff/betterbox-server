@@ -1,4 +1,11 @@
+import { Movie } from '../../src/model/Movie';
+import { beforeEach } from 'mocha';
+
 describe('Movie Model', function () {
+	let movie: Movie;
+	const createMovie = () => new Movie();
+	beforeEach(() => (movie = createMovie()));
+
 	describe('constructor', function () {
 		it('should set a title', function () {
 			this.skip();

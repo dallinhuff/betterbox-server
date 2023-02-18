@@ -1,4 +1,5 @@
 import { Handler } from 'express';
+import { UserService } from '../service/UserService';
 
 export const getProfile: Handler = async (req, res) => {
 	res.status(200).send('get user');
@@ -13,7 +14,9 @@ export const logout: Handler = async (req, res) => {
 };
 
 export const register: Handler = async (req, res) => {
-	res.status(200).send('registered');
+	const reqUser = req.body;
+	const response = await new UserService().create(reqUser);
+	res.status(200).send(response);
 };
 
 export const update: Handler = async (req, res) => {
