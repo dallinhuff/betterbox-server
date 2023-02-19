@@ -18,10 +18,10 @@ export class AuthDao extends Dao {
 		if (foundToken && foundToken.expire > Date.now()) {
 			if (foundToken.expire > Date.now()) {
 				foundToken.expire = Date.now() + 2 * 60 * 60 * 1000;
-				this.model.updateOne({ _id: foundToken._id }, foundToken);
+				this.model.findByIdAndUpdate(foundToken);
 				return true;
 			} else {
-				this.model.deleteOne(foundToken);
+				this.model.findByIdAndDelete(foundToken);
 				return false;
 			}
 		}
