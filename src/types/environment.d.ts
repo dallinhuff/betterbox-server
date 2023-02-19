@@ -9,6 +9,7 @@ declare global {
 		interface ProcessEnv {
 			APP_PORT: string;
 			DB_CONN: string;
+			OMDB_KEY: string;
 		}
 	}
 }
