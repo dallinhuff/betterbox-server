@@ -25,7 +25,8 @@ export class UserDao extends Dao {
 				`Cannot create user. Username ${user.username} already exists.`
 			);
 		}
-		return await this.model.create(user);
+		const { username, email, name, avatar } = await this.model.create(user);
+		return { username, email, name, avatar };
 	}
 
 	async update(user: User) {

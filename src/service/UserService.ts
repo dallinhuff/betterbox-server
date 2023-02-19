@@ -1,16 +1,22 @@
+import bcrypt from 'bcrypt';
+
 import { Service } from './Service';
 import { User } from '../model/User';
 import { UserDao } from '../dao/UserDao';
+import { AuthDao } from '../dao/AuthDao';
 
-interface RegisterResponse {
+interface LoginResponse {
 	success: boolean;
 	status: number;
-	user?: User;
+	authToken?: string;
 	error?: string;
 }
 
 export class UserService extends Service {
-	async create(user: User): Promise<RegisterResponse> {
+	/**
+	 * Attempts to add a new user to the database
+	 */
+	async create(user: User): Promise<LoginResponse> {
 		const dao = new UserDao();
 
 		if (await dao.exists(user)) {
@@ -22,11 +28,13 @@ export class UserService extends Service {
 		}
 
 		try {
+			await this.hashPassword(user);
 			const responseUser = await new UserDao().create(user);
+			const authToken = await new AuthDao().create(responseUser.username);
 			return {
 				success: true,
 				status: 200,
-				user: responseUser,
+				authToken,
 			};
 		} catch (e) {
 			return {
@@ -36,15 +44,20 @@ export class UserService extends Service {
 			};
 		}
 	}
-	async login(user: string, password: string): Promise<RegisterResponse> {
+
+	/**
+	 * Attempts to initialize an authenticated session as an existing user
+	 */
+	async login(username: string, password: string): Promise<LoginResponse> {
 		const dao = new UserDao();
 		try {
-			const responseUser = await dao.find(user);
-			if (responseUser.password === password) {
+			const foundUser = await dao.find(username);
+			if (await this.comparePassword(password, foundUser.password)) {
+				const authToken = await new AuthDao().create(foundUser.username);
 				return {
 					success: true,
 					status: 200,
-					user: responseUser,
+					authToken,
 				};
 			} else {
 				return {
@@ -60,5 +73,20 @@ export class UserService extends Service {
 				error: `Internal server error: ${e}`,
 			};
 		}
+	}
+
+	/**
+	 * Salts and hashes the password before storing it in the database
+	 */
+	private async hashPassword(user: User) {
+		user.password = await bcrypt.hash(user.password, 10);
+	}
+
+	/**
+	 * Compares a user's plaintext password to the
+	 * stored hashed & salted password in the database
+	 */
+	private async comparePassword(plainText: string, foundHash: string) {
+		return await bcrypt.compare(plainText, foundHash);
 	}
 }
