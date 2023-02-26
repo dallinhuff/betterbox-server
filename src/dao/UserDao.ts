@@ -15,12 +15,12 @@ export class UserDao extends Dao {
 		super('User', UserSchema);
 	}
 
-	async exists(user: User) {
-		return this.model.exists({ username: user.username });
+	async exists(username: string) {
+		return this.model.exists({ username: username });
 	}
 
 	async create(user: User) {
-		if (await this.exists(user)) {
+		if (await this.exists(user.username)) {
 			throw new Error(
 				`Cannot create user. Username ${user.username} already exists.`
 			);
@@ -29,7 +29,7 @@ export class UserDao extends Dao {
 		return { username, email, name, avatar };
 	}
 
-	async update(user: User) {
+	async update(user: Partial<User>) {
 		return this.model.updateOne({ username: user.username }, user);
 	}
 

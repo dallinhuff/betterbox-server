@@ -1,85 +1,70 @@
 import bcrypt from 'bcrypt';
 
-import { Service } from './Service';
 import { User } from '../model/User';
 import { UserDao } from '../dao/UserDao';
 import { AuthDao } from '../dao/AuthDao';
+import { LoginRequest } from '../request/LoginRequest';
+import { LogoutRequest } from '../request/LogoutRequest';
+import { UpdateUserRequest } from '../request/UpdateUserRequest';
+import { LoginResponse } from '../response/LoginResponse';
+import { RegisterRequest } from '../request/RegisterRequest';
+import { UpdateUserResponse } from '../response/UpdateUserResponse';
+import { LogoutResponse } from '../response/LogoutResponse';
 
-interface LoginResponse {
-	success: boolean;
-	status: number;
-	authToken?: string;
-	error?: string;
-}
-
-export class UserService extends Service {
+export class UserService {
 	/**
 	 * Attempts to add a new user to the database
 	 */
-	async create(user: User): Promise<LoginResponse> {
+	async register(request: RegisterRequest): Promise<LoginResponse> {
 		const dao = new UserDao();
 
-		if (await dao.exists(user)) {
-			return {
-				success: false,
-				status: 400,
-				error: `User with username ${user.username} already exists.`,
-			};
+		if (await dao.exists(request.username)) {
+			const err = `User with username ${request.username} already exists.`;
+			return LoginResponse.error(401, err);
 		}
 
 		try {
-			await this.hashPassword(user);
-			const responseUser = await new UserDao().create(user);
+			request.password = await this.hashPassword(request.password);
+			const responseUser = await dao.create(request.user);
 			const authToken = await new AuthDao().create(responseUser.username);
-			return {
-				success: true,
-				status: 200,
-				authToken,
-			};
+			return LoginResponse.success(authToken);
 		} catch (e) {
-			return {
-				success: false,
-				status: 500,
-				error: `Internal server error: ${e}`,
-			};
+			return LoginResponse.error(500, `Internal server error: ${e}`);
 		}
 	}
 
 	/**
 	 * Attempts to initialize an authenticated session as an existing user
 	 */
-	async login(username: string, password: string): Promise<LoginResponse> {
-		const dao = new UserDao();
+	async login(credentials: LoginRequest): Promise<LoginResponse> {
+		const { username, password } = credentials;
 		try {
-			const foundUser = await dao.find(username);
+			const foundUser = await new UserDao().find(username);
 			if (await this.comparePassword(password, foundUser.password)) {
 				const authToken = await new AuthDao().create(foundUser.username);
-				return {
-					success: true,
-					status: 200,
-					authToken,
-				};
+				return LoginResponse.success(authToken);
 			} else {
-				return {
-					success: false,
-					status: 401,
-					error: `Unauthorized`,
-				};
+				return LoginResponse.error(401, 'Incorrect username or password');
 			}
 		} catch (e) {
-			return {
-				success: false,
-				status: 500,
-				error: `Internal server error: ${e}`,
-			};
+			return LoginResponse.error(500, `Internal server error: ${e}`);
+		}
+	}
+
+	async logout(request: LogoutRequest) {
+		try {
+			await new AuthDao().delete(request.authToken);
+			return LogoutResponse.success();
+		} catch (e) {
+			return LogoutResponse.error(500, `Internal server error: ${e}`);
 		}
 	}
 
 	/**
 	 * Salts and hashes the password before storing it in the database
 	 */
-	private async hashPassword(user: User) {
-		user.password = await bcrypt.hash(user.password, 10);
+	private async hashPassword(password: string): Promise<string> {
+		return await bcrypt.hash(password, 10);
 	}
 
 	/**
@@ -88,5 +73,47 @@ export class UserService extends Service {
 	 */
 	private async comparePassword(plainText: string, foundHash: string) {
 		return await bcrypt.compare(plainText, foundHash);
+	}
+
+	async update(request: UpdateUserRequest): Promise<UpdateUserResponse> {
+		const existingUser = await this.findByAuthToken(request.authToken);
+
+		if (!existingUser) {
+			const err = 'Bad or expired authToken';
+			return new UpdateUserResponse(false, 400, err);
+		}
+
+		// pre-processing for changing username
+		if (request.username && request.username !== existingUser.username) {
+			if (await new UserDao().exists(request.username)) {
+				const err = `User with username ${request.username} already exists`;
+				return new UpdateUserResponse(false, 401, err);
+			}
+		}
+
+		// pre-processing for changing password
+		if (request.password) {
+			request.password = await this.hashPassword(request.password);
+		}
+
+		try {
+			await new UserDao().update(request.user);
+			return new UpdateUserResponse(true, 200);
+		} catch (e) {
+			const err = `Internal server error: ${e}`;
+			return new UpdateUserResponse(false, 500, err);
+		}
+	}
+
+	private async find(username: string) {
+		return await new UserDao().find(username);
+	}
+
+	private async findByAuthToken(token: string): Promise<User | null> {
+		const foundToken = await new AuthDao().find(token);
+		if (foundToken) {
+			return await this.find(foundToken.username);
+		}
+		return null;
 	}
 }

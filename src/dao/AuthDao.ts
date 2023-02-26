@@ -14,18 +14,7 @@ export class AuthDao extends Dao {
 	}
 
 	async exists(token: string) {
-		const foundToken = await this.model.findOne({ token });
-		if (foundToken && foundToken.expire > Date.now()) {
-			if (foundToken.expire > Date.now()) {
-				foundToken.expire = Date.now() + 2 * 60 * 60 * 1000;
-				this.model.findByIdAndUpdate(foundToken);
-				return true;
-			} else {
-				this.model.findByIdAndDelete(foundToken);
-				return false;
-			}
-		}
-		return false;
+		return !!(await this.find(token));
 	}
 
 	async create(username: string) {
@@ -39,6 +28,21 @@ export class AuthDao extends Dao {
 	}
 
 	async find(token: string) {
-		return this.model.findOne({ token });
+		const foundToken = await this.model.findOne({ token });
+		if (foundToken && foundToken.expire > Date.now()) {
+			if (foundToken.expire > Date.now()) {
+				foundToken.expire = Date.now() + 2 * 60 * 60 * 1000;
+				this.model.findByIdAndUpdate(foundToken);
+				return foundToken;
+			} else {
+				this.model.findByIdAndDelete(foundToken);
+				return null;
+			}
+		}
+		return null;
+	}
+
+	async delete(token: string) {
+		this.model.findOneAndDelete({ token });
 	}
 }

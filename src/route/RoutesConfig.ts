@@ -9,11 +9,7 @@ export abstract class RoutesConfig {
 	name: string;
 	readonly baseUrl: string;
 
-	protected constructor(
-		app: express.Application,
-		name: string,
-		baseUrl: string
-	) {
+	protected constructor(app: express.Application, name: string, baseUrl: string) {
 		this.app = app;
 		this.name = name;
 		this.baseUrl = baseUrl;
