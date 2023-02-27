@@ -12,14 +12,10 @@ export class ReviewRoutesConfig extends RoutesConfig {
 
 	configureRoutes(): Application {
 		// get by user
-		this.app
-			.route(`${this.baseUrl}/user/:username`)
-			.get(controller.getByUser);
+		this.app.route(`${this.baseUrl}/user/:username`).get(controller.getByUser);
 
 		// get by movie
-		this.app
-			.route(`${this.baseUrl}/movie/:movieId`)
-			.get(controller.getByMovie);
+		this.app.route(`${this.baseUrl}/movie/:movieId`).get(controller.getByMovie);
 
 		// write a new review
 		this.app.route(`${this.baseUrl}`).post(controller.postReview);
@@ -31,9 +27,7 @@ export class ReviewRoutesConfig extends RoutesConfig {
 			.delete(controller.deleteReview);
 
 		// like a review
-		this.app
-			.route(`${this.baseUrl}/like/:reviewId`)
-			.put(controller.likeReview);
+		this.app.route(`${this.baseUrl}/like/:reviewId`).put(controller.likeReview);
 
 		// unlike a review
 		this.app

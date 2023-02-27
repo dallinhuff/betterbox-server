@@ -10,6 +10,10 @@ import { LoginResponse } from '../response/LoginResponse';
 import { RegisterRequest } from '../request/RegisterRequest';
 import { UpdateUserResponse } from '../response/UpdateUserResponse';
 import { LogoutResponse } from '../response/LogoutResponse';
+import { GetProfileRequest } from '../request/GetProfileRequest';
+import { GetOwnProfileRequest } from '../request/GetOwnProfileRequest';
+import { GetProfileResponse } from '../response/GetProfileResponse';
+import { GetOwnProfileResponse } from '../response/GetOwnProfileResponse';
 
 export class UserService {
 	/**
@@ -75,6 +79,28 @@ export class UserService {
 		return await bcrypt.compare(plainText, foundHash);
 	}
 
+	async getProfile(request: GetProfileRequest) {
+		try {
+			const user = await this.find(request.username);
+			return GetProfileResponse.success(user);
+		} catch (e) {
+			return GetProfileResponse.error(500, `Internal server error: ${e}`);
+		}
+	}
+
+	async getOwnProfile(
+		request: GetOwnProfileRequest
+	): Promise<GetOwnProfileResponse> {
+		try {
+			const user = await this.findByAuthToken(request.authToken);
+			return user
+				? GetOwnProfileResponse.success(user)
+				: GetOwnProfileResponse.error(400, 'bad authToken');
+		} catch (e) {
+			return GetOwnProfileResponse.error(500, `Internal server error: ${e}`);
+		}
+	}
+
 	async update(request: UpdateUserRequest): Promise<UpdateUserResponse> {
 		const existingUser = await this.findByAuthToken(request.authToken);
 
@@ -106,10 +132,12 @@ export class UserService {
 	}
 
 	private async find(username: string) {
+		// TODO: need to sanitize the email and password out of this
 		return await new UserDao().find(username);
 	}
 
 	private async findByAuthToken(token: string): Promise<User | null> {
+		// TODO: need to sanitize the password out of this
 		const foundToken = await new AuthDao().find(token);
 		if (foundToken) {
 			return await this.find(foundToken.username);

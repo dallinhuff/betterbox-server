@@ -4,12 +4,23 @@ import { LoginRequest } from '../request/LoginRequest';
 import { LogoutRequest } from '../request/LogoutRequest';
 import { RegisterRequest } from '../request/RegisterRequest';
 import { UpdateUserRequest } from '../request/UpdateUserRequest';
+import { GetProfileRequest } from '../request/GetProfileRequest';
+import { GetOwnProfileRequest } from '../request/GetOwnProfileRequest';
+
+export const getOwnProfile: Handler = async (req, res) => {
+	const authToken = req.header('authToken') || '';
+	const getOwnProfileRequest = new GetOwnProfileRequest(authToken);
+	const response = await new UserService().getOwnProfile(getOwnProfileRequest);
+	res.status(response.status).send(response);
+};
 
 /**
  * find the publicly available profile info for a specific user
  */
 export const getProfile: Handler = async (req, res) => {
-	res.status(200).send('get user');
+	const getProfileRequest = new GetProfileRequest(req.params.username);
+	const response = await new UserService().getProfile(getProfileRequest);
+	res.status(response.status).send(response);
 };
 
 /**
@@ -93,6 +104,7 @@ export const getFeed: Handler = async (req, res) => {
 };
 
 export default {
+	getOwnProfile,
 	getProfile,
 	login,
 	logout,
