@@ -88,9 +88,7 @@ export class UserService {
 		}
 	}
 
-	async getOwnProfile(
-		request: GetOwnProfileRequest
-	): Promise<GetOwnProfileResponse> {
+	async getOwnProfile(request: GetOwnProfileRequest) {
 		try {
 			const user = await this.findByAuthToken(request.authToken);
 			return user
@@ -132,12 +130,10 @@ export class UserService {
 	}
 
 	private async find(username: string) {
-		// TODO: need to sanitize the email and password out of this
 		return await new UserDao().find(username);
 	}
 
 	private async findByAuthToken(token: string): Promise<User | null> {
-		// TODO: need to sanitize the password out of this
 		const foundToken = await new AuthDao().find(token);
 		if (foundToken) {
 			return await this.find(foundToken.username);

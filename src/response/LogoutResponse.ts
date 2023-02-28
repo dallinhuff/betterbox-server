@@ -1,7 +1,7 @@
 import { Response } from './Response';
 
 export class LogoutResponse extends Response {
-	constructor(success: boolean, status: number, error?: string) {
+	private constructor(success: boolean, status: number, error?: string) {
 		super(success, status, error);
 	}
 

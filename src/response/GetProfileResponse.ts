@@ -2,22 +2,44 @@ import { Response } from './Response';
 import { User } from '../model/User';
 
 export class GetProfileResponse extends Response {
-	user?: User;
-	constructor(success: boolean, status: number, user?: User, error?: string) {
+	username?: string;
+	name?: string;
+	avatar?: string;
+
+	protected constructor(
+		success: boolean,
+		status: number,
+		error?: string,
+		username?: string,
+		name?: string,
+		avatar?: string
+	) {
 		super(success, status);
-		if (user) {
-			this.user = user;
-		}
 		if (error) {
 			this.error = error;
+		} else {
+			this.username = username;
+			this.name = name;
+			this.avatar = avatar;
 		}
 	}
 
-	static success(user: User) {
-		return new GetProfileResponse(true, 200, user);
+	static override success(user: User) {
+		return new GetProfileResponse(
+			true,
+			200,
+			undefined,
+			user.username,
+			user.name,
+			user.avatar
+		);
 	}
 
-	static error(status: number, error: string) {
-		return new GetProfileResponse(false, status, undefined, error);
+	get user(): Partial<User> {
+		return {
+			username: this.username,
+			name: this.name,
+			avatar: this.avatar,
+		};
 	}
 }

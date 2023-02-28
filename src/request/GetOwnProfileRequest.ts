@@ -1,10 +1,7 @@
-import { Request } from './Request';
+import { AuthRequest } from './AuthRequest';
 
-export class GetOwnProfileRequest extends Request {
-	authToken: string;
-
+export class GetOwnProfileRequest extends AuthRequest {
 	constructor(authToken: string) {
-		super();
-		this.authToken = authToken;
+		super(authToken);
 	}
 }
