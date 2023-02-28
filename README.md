@@ -48,3 +48,24 @@ brew services stop mongodb-community@6.0
 
 For windows and other installations, you'll need to check out the MongoDB documentation for more info.
 You can also configure an online Mongo Atlas cluster using their free tier.
+
+To directly view/edit your local database, you can use `mongosh`
+
+```
+# switch to the betterbox db
+use betterbox
+
+# show all tables/collections in the db
+show collections
+
+# show all of the users in your users collection
+db.users.find({})
+
+# show a user with a specific username
+db.users.findOne({username: "@me"})
+
+# delete all of the users in your user collection
+db.users.deleteMany({})
+```
+
+See the mongosh documentation for more info.

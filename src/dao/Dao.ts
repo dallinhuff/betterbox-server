@@ -3,11 +3,7 @@ import mongoose, { Schema, model, Model } from 'mongoose';
 export abstract class Dao {
 	connection: any;
 	model: Model<any>;
-	protected constructor(
-		name: string,
-		schema: Schema,
-		collectionName?: string
-	) {
+	protected constructor(name: string, schema: Schema, collectionName?: string) {
 		this.connect().then((r) => (this.connection = r));
 		this.model = model(name, schema, collectionName);
 	}

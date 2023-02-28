@@ -20,12 +20,6 @@ export class User {
 	}
 
 	static from(obj: User): User {
-		return new User(
-			obj.username,
-			obj.password,
-			obj.email,
-			obj.name,
-			obj.avatar
-		);
+		return new User(obj.username, obj.password, obj.email, obj.name, obj.avatar);
 	}
 }

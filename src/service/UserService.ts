@@ -10,6 +10,10 @@ import { LoginResponse } from '../response/LoginResponse';
 import { RegisterRequest } from '../request/RegisterRequest';
 import { UpdateUserResponse } from '../response/UpdateUserResponse';
 import { LogoutResponse } from '../response/LogoutResponse';
+import { GetProfileRequest } from '../request/GetProfileRequest';
+import { GetOwnProfileRequest } from '../request/GetOwnProfileRequest';
+import { GetProfileResponse } from '../response/GetProfileResponse';
+import { GetOwnProfileResponse } from '../response/GetOwnProfileResponse';
 
 export class UserService {
 	/**
@@ -73,6 +77,26 @@ export class UserService {
 	 */
 	private async comparePassword(plainText: string, foundHash: string) {
 		return await bcrypt.compare(plainText, foundHash);
+	}
+
+	async getProfile(request: GetProfileRequest) {
+		try {
+			const user = await this.find(request.username);
+			return GetProfileResponse.success(user);
+		} catch (e) {
+			return GetProfileResponse.error(500, `Internal server error: ${e}`);
+		}
+	}
+
+	async getOwnProfile(request: GetOwnProfileRequest) {
+		try {
+			const user = await this.findByAuthToken(request.authToken);
+			return user
+				? GetOwnProfileResponse.success(user)
+				: GetOwnProfileResponse.error(400, 'bad authToken');
+		} catch (e) {
+			return GetOwnProfileResponse.error(500, `Internal server error: ${e}`);
+		}
 	}
 
 	async update(request: UpdateUserRequest): Promise<UpdateUserResponse> {

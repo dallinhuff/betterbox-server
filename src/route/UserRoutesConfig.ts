@@ -12,9 +12,7 @@ export class UserRoutesConfig extends RoutesConfig {
 
 	configureRoutes(): Application {
 		// register
-		this.app
-			.route(`${this.baseUrl}/register`)
-			.post(UserController.register);
+		this.app.route(`${this.baseUrl}/register`).post(UserController.register);
 
 		// login & logout
 		this.app
@@ -25,14 +23,12 @@ export class UserRoutesConfig extends RoutesConfig {
 		// get and edit own profile
 		this.app
 			.route(`${this.baseUrl}/me`)
-			.get(UserController.getProfile)
+			.get(UserController.getOwnProfile)
 			.patch(UserController.update)
 			.delete(UserController.remove);
 
 		// get any public profile info
-		this.app
-			.route(`${this.baseUrl}/:username`)
-			.get(UserController.getProfile);
+		this.app.route(`${this.baseUrl}/:username`).get(UserController.getProfile);
 
 		// followers
 		this.app
