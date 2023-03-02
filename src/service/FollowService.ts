@@ -20,7 +20,6 @@ export class FollowService extends Service {
 			}
 			const followDao = new FollowDao();
 			const exist = await followDao.find(username, authToken.username);
-			console.log(exist);
 			if (exist != null) {
 				return Response.error(401, 'Relationship exist');
 			}
