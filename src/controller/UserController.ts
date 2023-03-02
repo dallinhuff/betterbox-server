@@ -4,6 +4,7 @@ import { LoginRequest } from '../request/LoginRequest';
 import { LogoutRequest } from '../request/LogoutRequest';
 import { RegisterRequest } from '../request/RegisterRequest';
 import { UpdateUserRequest } from '../request/UpdateUserRequest';
+import { FollowService } from '../service/FollowService';
 import { GetProfileRequest } from '../request/GetProfileRequest';
 import { GetOwnProfileRequest } from '../request/GetOwnProfileRequest';
 
@@ -86,7 +87,12 @@ export const getFollowing: Handler = async (req, res) => {
  * follow a given user as a logged-in user
  */
 export const follow: Handler = async (req, res) => {
-	res.status(200).send('follow');
+	const authToken = req.header('authToken') || '';
+	const response = await new FollowService().follow(
+		authToken,
+		req.params.username
+	);
+	res.status(response.status).send(response);
 };
 
 /**
