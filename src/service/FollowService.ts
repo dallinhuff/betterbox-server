@@ -16,14 +16,20 @@ export class FollowService extends Service {
 		if (authToken != null) {
 			const follow = await userDao.exists(username);
 			if (follow != null) {
-				return new Response.error(401, 'Incorrect username');
+				return Response.error(401, 'Incorrect username');
 			}
-			const followRelationship = await new FollowDao().create(
+			const followDao = new FollowDao();
+			const exist = await followDao.find(username, authToken.username);
+			console.log(exist);
+			if (exist != null) {
+				return Response.error(401, 'Relationship exist');
+			}
+			const followRelationship = await followDao.create(
 				username,
 				authToken.username
 			);
-			return new Response.success();
+			return Response.success('');
 		}
-		return new ResponseResponse.error(401, 'Incorrect username');
+		return Response.error(401, 'Incorrect username');
 	}
 }
