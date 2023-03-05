@@ -1,6 +1,7 @@
 import { Application } from 'express';
 import { RoutesConfig } from './RoutesConfig';
 import UserController from '../controller/UserController';
+import AuthParser from '../middleware/AuthParser';
 
 /**
  * Route configuration class for User-related API endpoints
@@ -12,38 +13,51 @@ export class UserRoutesConfig extends RoutesConfig {
 
 	configureRoutes(): Application {
 		// register
-		this.app.route(`${this.baseUrl}/register`).post(UserController.register);
+		const registerEndpoint = `${this.baseUrl}/register`;
+		this.app.route(registerEndpoint).post(UserController.register);
 
-		// login & logout
+		// login
+		const loginEndpoint = `${this.baseUrl}/login`;
+		this.app.route(loginEndpoint).post(UserController.login);
+
+		// logout
+		const logoutEndpoint = `${this.baseUrl}/logout`;
 		this.app
-			.route(`${this.baseUrl}/login`)
-			.post(UserController.login)
+			.use(logoutEndpoint, AuthParser)
+			.route(logoutEndpoint)
 			.delete(UserController.logout);
 
 		// get and edit own profile
+		const meEndpoint = `${this.baseUrl}/me`;
 		this.app
-			.route(`${this.baseUrl}/me`)
+			.use(meEndpoint, AuthParser)
+			.route(meEndpoint)
 			.get(UserController.getOwnProfile)
 			.patch(UserController.update)
 			.delete(UserController.remove);
 
 		// get any public profile info
-		this.app.route(`${this.baseUrl}/:username`).get(UserController.getProfile);
+		const getUserEndpoint = `${this.baseUrl}/:username`;
+		this.app.route(getUserEndpoint).get(UserController.getProfile);
 
 		// followers
+		const followersEndpoint = `${this.baseUrl}/followers/:username`;
 		this.app
-			.route(`${this.baseUrl}/followers/:username`)
+			.route(followersEndpoint)
 			.get(UserController.getFollowers)
 			.post(UserController.follow)
 			.delete(UserController.unfollow);
 
 		// following
-		this.app
-			.route(`${this.baseUrl}/following/:username`)
-			.get(UserController.getFollowing);
+		const followingEndpoint = `${this.baseUrl}/following/:username`;
+		this.app.route(followingEndpoint).get(UserController.getFollowing);
 
 		// feed
-		this.app.route(`${this.baseUrl}/feed`).get(UserController.getFeed);
+		const feedEndpoint = `${this.baseUrl}/feed`;
+		this.app
+			.use(feedEndpoint, AuthParser)
+			.route(feedEndpoint)
+			.get(UserController.getFeed);
 
 		return this.app;
 	}
