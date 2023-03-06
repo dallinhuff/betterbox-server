@@ -30,7 +30,7 @@ export class UserService {
 		try {
 			request.password = await this.hashPassword(request.password);
 			const responseUser = await dao.create(request.user);
-			const authToken = await new AuthDao().create(responseUser.username);
+			const authToken = await new AuthDao().create(responseUser.id!);
 			return LoginResponse.success(authToken);
 		} catch (e) {
 			return LoginResponse.error(500, `Internal server error: ${e}`);
@@ -44,8 +44,12 @@ export class UserService {
 		const { username, password } = credentials;
 		try {
 			const foundUser = await new UserDao().find(username);
-			if (await this.comparePassword(password, foundUser.password)) {
-				const authToken = await new AuthDao().create(foundUser.username);
+
+			if (
+				foundUser &&
+				(await this.comparePassword(password, foundUser.password))
+			) {
+				const authToken = await new AuthDao().create(foundUser.id!);
 				return LoginResponse.success(authToken);
 			} else {
 				return LoginResponse.error(401, 'Incorrect username or password');
@@ -82,6 +86,12 @@ export class UserService {
 	async getProfile(request: GetProfileRequest) {
 		try {
 			const user = await this.find(request.username);
+			if (!user) {
+				return GetProfileResponse.error(
+					401,
+					`User with username ${request.username} does not exist.`
+				);
+			}
 			return GetProfileResponse.success(user);
 		} catch (e) {
 			return GetProfileResponse.error(500, `Internal server error: ${e}`);
@@ -104,14 +114,14 @@ export class UserService {
 
 		if (!existingUser) {
 			const err = 'Bad or expired authToken';
-			return new UpdateUserResponse(false, 400, err);
+			return UpdateUserResponse.error(400, err);
 		}
 
 		// pre-processing for changing username
 		if (request.username && request.username !== existingUser.username) {
 			if (await new UserDao().exists(request.username)) {
 				const err = `User with username ${request.username} already exists`;
-				return new UpdateUserResponse(false, 401, err);
+				return UpdateUserResponse.error(401, err);
 			}
 		}
 
@@ -121,11 +131,12 @@ export class UserService {
 		}
 
 		try {
-			await new UserDao().update(request.user);
+			await new UserDao().update(existingUser.id!, request.user);
+			return UpdateUserResponse.success('');
 			return new UpdateUserResponse(true, 200);
 		} catch (e) {
 			const err = `Internal server error: ${e}`;
-			return new UpdateUserResponse(false, 500, err);
+			return UpdateUserResponse.error(500, err);
 		}
 	}
 
@@ -136,7 +147,7 @@ export class UserService {
 	private async findByAuthToken(token: string): Promise<User | null> {
 		const foundToken = await new AuthDao().find(token);
 		if (foundToken) {
-			return await this.find(foundToken.username);
+			return await new UserDao().findById(foundToken.userId);
 		}
 		return null;
 	}
