@@ -10,13 +10,14 @@ export class UpdateUserRequest extends AuthRequest {
 
 	constructor(
 		authToken: string,
+		userId: string,
 		username?: string,
 		password?: string,
 		name?: string,
 		email?: string,
 		avatar?: string
 	) {
-		super(authToken);
+		super(authToken, userId);
 		this.username = username;
 		this.password = password;
 		this.name = name;
@@ -27,6 +28,7 @@ export class UpdateUserRequest extends AuthRequest {
 	static from(authToken: string, user: Partial<User>) {
 		return new UpdateUserRequest(
 			authToken,
+			user.id!,
 			user.username,
 			user.password,
 			user.name,
