@@ -1,5 +1,3 @@
-import bcrypt from 'bcrypt';
-
 import { User } from '../model/User';
 import { UserDao } from '../dao/UserDao';
 import { AuthDao } from '../dao/AuthDao';
@@ -28,7 +26,6 @@ export class UserService {
 		}
 
 		try {
-			request.password = await this.hashPassword(request.password);
 			const responseUser = await dao.create(request.user);
 			const authToken = await new AuthDao().create(responseUser.id!);
 			return LoginResponse.success(authToken);
@@ -43,12 +40,11 @@ export class UserService {
 	async login(credentials: LoginRequest): Promise<LoginResponse> {
 		const { username, password } = credentials;
 		try {
-			const foundUser = await new UserDao().find(username);
-
-			if (
-				foundUser &&
-				(await this.comparePassword(password, foundUser.password))
-			) {
+			const foundUser = await new UserDao().findAndCheckPassword(
+				username,
+				password
+			);
+			if (foundUser) {
 				const authToken = await new AuthDao().create(foundUser.id!);
 				return LoginResponse.success(authToken);
 			} else {
@@ -66,21 +62,6 @@ export class UserService {
 		} catch (e) {
 			return LogoutResponse.error(500, `Internal server error: ${e}`);
 		}
-	}
-
-	/**
-	 * Salts and hashes the password before storing it in the database
-	 */
-	private async hashPassword(password: string): Promise<string> {
-		return await bcrypt.hash(password, 10);
-	}
-
-	/**
-	 * Compares a user's plaintext password to the
-	 * stored hashed & salted password in the database
-	 */
-	private async comparePassword(plainText: string, foundHash: string) {
-		return await bcrypt.compare(plainText, foundHash);
 	}
 
 	async getProfile(request: GetProfileRequest) {
@@ -125,15 +106,9 @@ export class UserService {
 			}
 		}
 
-		// pre-processing for changing password
-		if (request.password) {
-			request.password = await this.hashPassword(request.password);
-		}
-
 		try {
 			await new UserDao().update(existingUser.id!, request.user);
 			return UpdateUserResponse.success('');
-			return new UpdateUserResponse(true, 200);
 		} catch (e) {
 			const err = `Internal server error: ${e}`;
 			return UpdateUserResponse.error(500, err);
