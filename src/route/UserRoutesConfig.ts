@@ -43,6 +43,7 @@ export class UserRoutesConfig extends RoutesConfig {
 		// followers
 		const followersEndpoint = `${this.baseUrl}/followers/:username`;
 		this.app
+			.use(followersEndpoint, AuthParser)
 			.route(followersEndpoint)
 			.get(UserController.getFollowers)
 			.post(UserController.follow)

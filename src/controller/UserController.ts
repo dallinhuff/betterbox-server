@@ -9,7 +9,10 @@ import { GetProfileRequest } from '../request/GetProfileRequest';
 import { GetOwnProfileRequest } from '../request/GetOwnProfileRequest';
 
 export const getOwnProfile: Handler = async (req, res) => {
-	const getOwnProfileRequest = new GetOwnProfileRequest(req.authToken!);
+	const getOwnProfileRequest = new GetOwnProfileRequest(
+		req.authToken!,
+		req.userId!
+	);
 	const response = await new UserService().getOwnProfile(getOwnProfileRequest);
 	res.status(response.status).send(response);
 };
@@ -36,7 +39,7 @@ export const login: Handler = async (req, res) => {
  * log out of an active user session
  */
 export const logout: Handler = async (req, res) => {
-	const logoutRequest = new LogoutRequest(req.authToken!);
+	const logoutRequest = new LogoutRequest(req.authToken!, req.userId!);
 	const response = await new UserService().logout(logoutRequest);
 	res.status(response.status).send(response);
 };
@@ -54,7 +57,10 @@ export const register: Handler = async (req, res) => {
  * update a user's own profile info
  */
 export const update: Handler = async (req, res) => {
-	const updateRequest = UpdateUserRequest.from(req.authToken!, req.body);
+	const updateRequest = UpdateUserRequest.from(req.authToken!, {
+		id: req.userId!,
+		...req.body,
+	});
 	const response = await new UserService().update(updateRequest);
 	res.status(response.status).send(response);
 };
@@ -85,7 +91,7 @@ export const getFollowing: Handler = async (req, res) => {
  */
 export const follow: Handler = async (req, res) => {
 	const response = await new FollowService().follow(
-		req.authToken!,
+		req.userId!,
 		req.params.username
 	);
 	res.status(response.status).send(response);

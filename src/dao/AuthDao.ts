@@ -1,10 +1,11 @@
 import { Dao } from './Dao';
 import { Schema } from 'mongoose';
 import { v4 as uuid } from 'uuid';
+import { Types as MongooseTypes } from 'mongoose';
 
 const AuthTokenSchema = new Schema({
 	token: String,
-	username: String,
+	userId: MongooseTypes.ObjectId,
 	expire: String,
 });
 
@@ -17,11 +18,11 @@ export class AuthDao extends Dao {
 		return !!(await this.find(token));
 	}
 
-	async create(username: string) {
+	async create(userId: string) {
 		const expire = Date.now() + 2 * 60 * 60 * 1000;
 		const authToken = await this.model.create({
 			token: uuid(),
-			username,
+			userId,
 			expire,
 		});
 		return authToken.token;

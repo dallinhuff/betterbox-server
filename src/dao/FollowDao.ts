@@ -1,29 +1,25 @@
 import { Dao } from './Dao';
 import { Schema } from 'mongoose';
 
-const Follow = new Schema({
-	follow: String,
+const FollowSchema = new Schema({
+	followee: String,
 	follower: String,
 });
 
 export class FollowDao extends Dao {
 	constructor() {
-		super('Follow', Follow, 'follows');
+		super('Follow', FollowSchema, 'follows');
 	}
 
-	async create(follow: string, follower: string) {
-		const followRelationship = await this.model.create({
-			follow: follow,
-			follower: follower,
-		});
-		return followRelationship;
+	async create(followee: string, follower: string) {
+		return await this.model.create({ followee, follower });
 	}
 
-	async find(follow: string, follower: string) {
-		const dbModel = await this.model.findOne({
-			follow: follow,
-			follower: follower,
-		});
-		return dbModel;
+	async find(followee: string, follower: string) {
+		return this.model.findOne({ followee, follower });
+	}
+
+	async delete(followee: string, follower: string) {
+		return this.model.deleteOne({ followee, follower });
 	}
 }
