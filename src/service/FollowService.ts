@@ -1,4 +1,3 @@
-import { AuthDao } from '../dao/AuthDao';
 import { Service } from './Service';
 import { Response } from '../response/Response';
 import { FollowDao } from '../dao/FollowDao';
@@ -9,26 +8,22 @@ export class FollowService extends Service {
 		return Promise.resolve(undefined);
 	}
 
-	async follow(authTokenString: string, username: string): Promise<Response> {
-		const authDao = new AuthDao();
+	async follow(userId: string, targetUsername: string): Promise<Response> {
 		const userDao = new UserDao();
-		const authToken = await authDao.find(authTokenString);
-		if (authToken != null) {
-			const follow = await userDao.exists(username);
-			if (follow != null) {
-				return Response.error(401, 'Incorrect username');
-			}
-			const followDao = new FollowDao();
-			const exist = await followDao.find(username, authToken.username);
-			if (exist != null) {
-				return Response.error(401, 'Relationship exist');
-			}
-			const followRelationship = await followDao.create(
-				username,
-				authToken.username
-			);
-			return Response.success('');
+		const followDao = new FollowDao();
+		const targetUserId = (await userDao.find(targetUsername))?.id;
+		if (!targetUserId) {
+			const err = `User with username ${targetUsername} does not exist`;
+			return Response.error(401, err);
 		}
-		return Response.error(401, 'Incorrect username');
+		if (userId === targetUserId) {
+			return Response.error(401, `User cannot follow self`);
+		}
+		const alreadyFollows = !!(await followDao.find(targetUserId, userId));
+		if (alreadyFollows) {
+			return Response.error(208, `User already follows ${targetUsername}`);
+		}
+		await followDao.create(userId, targetUserId);
+		return Response.success('followed ' + targetUsername);
 	}
 }
