@@ -39,11 +39,11 @@ export class UserDao extends Dao {
 
 	async find(username: string) {
 		const dbModel = await this.model.findOne({ username });
-		return dbModel ? User.from(dbModel) : null;
+		return dbModel ? User.from({ ...dbModel, id: dbModel._id }) : null;
 	}
 
 	async findById(id: string) {
 		const dbModel = await this.model.findById(id);
-		return dbModel ? User.from(dbModel) : null;
+		return dbModel ? User.from({ ...dbModel, id: dbModel._id }) : null;
 	}
 }
