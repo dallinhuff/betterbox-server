@@ -7,6 +7,7 @@ const Follow = new Schema({
 });
 
 export class FollowDao extends Dao {
+	followersPerPage = 10;
 	constructor() {
 		super('Follow', Follow, 'follows');
 	}
@@ -25,5 +26,34 @@ export class FollowDao extends Dao {
 			follower: follower,
 		});
 		return dbModel;
+	}
+
+	async delete(follow: string, follower: string) {
+		return this.model.deleteOne({
+			follow: follow,
+			follower: follower,
+		});
+	}
+
+	async followers(follow: string, page: number) {
+		this.model
+			.find({
+				where: {
+					follow: follow,
+				},
+			})
+			.skip(page * this.followersPerPage)
+			.limit(this.followersPerPage);
+	}
+
+	async following(follower: string, page: number) {
+		this.model
+			.find({
+				where: {
+					follower: follower,
+				},
+			})
+			.skip(page * this.followersPerPage)
+			.limit(this.followersPerPage);
 	}
 }
