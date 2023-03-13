@@ -24,4 +24,16 @@ export class Review {
 		this.numLikes = numLikes || 0;
 		this.id = id;
 	}
+
+	static from(review: Review) {
+		return new Review(
+			review.userId,
+			review.movieId,
+			review.rating,
+			review.liked,
+			review.body,
+			review.numLikes,
+			review.id
+		);
+	}
 }
