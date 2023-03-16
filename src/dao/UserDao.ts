@@ -49,7 +49,7 @@ export class UserDao extends Dao {
 
 	async findAndCheckPassword(username: string, password?: string) {
 		const dbModel = await this.model.findOne({ username });
-		if (await bcrypt.compare(password || '', dbModel.password)) {
+		if (dbModel && (await bcrypt.compare(password || '', dbModel.password))) {
 			return User.from({ ...dbModel, id: dbModel._id });
 		}
 		return null;
