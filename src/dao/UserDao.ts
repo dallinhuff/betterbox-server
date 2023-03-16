@@ -64,6 +64,6 @@ export class UserDao extends Dao {
 
 	async findById(id: string) {
 		const dbModel = await this.model.findById(id);
-		return dbModel ? User.from({ ...dbModel, id: dbModel._id }) : null;
+		return dbModel ? User.from(dbModel) : null;
 	}
 }
