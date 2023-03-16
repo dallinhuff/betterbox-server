@@ -3,15 +3,23 @@ import { Response } from '../response/Response';
 import { AuthDao } from '../dao/AuthDao';
 
 /**
- * Middleware for parsing the authToken header from a request and making it accessible via req.authToken!
+ * Middleware for parsing the authToken header from a request and
+ * making it and its associated userId accessible via req.authToken! and req.userId!
  */
 export async function parseAuthToken(req: eReq, res: eRes, next: NextFunction) {
 	const token = req.header('authToken');
-	if (!token || !(await new AuthDao().exists(token))) {
-		const response = Response.error(401, 'Bad or missing authToken');
+	if (!token) {
+		const response = Response.error(401, 'Missing authToken');
 		res.status(response.status).send(response);
 	} else {
-		req.authToken = token;
+		const authTokenObj = await new AuthDao().find(token);
+		if (!authTokenObj) {
+			const response = Response.error(401, 'Bad or expired authToken');
+			res.status(response.status).send(response);
+		} else {
+			req.authToken = token;
+			req.userId = authTokenObj.userId.toString();
+		}
 	}
 	next();
 }

@@ -1,6 +1,7 @@
 import { Dao } from './Dao';
 import { Schema } from 'mongoose';
 import { User } from '../model/User';
+import bcrypt from 'bcrypt';
 
 const UserSchema = new Schema({
 	username: String,
@@ -16,7 +17,7 @@ export class UserDao extends Dao {
 	}
 
 	async exists(username: string) {
-		return this.model.exists({ username: username });
+		return this.model.exists({ username });
 	}
 
 	async create(user: User) {
@@ -25,12 +26,16 @@ export class UserDao extends Dao {
 				`Cannot create user. Username ${user.username} already exists.`
 			);
 		}
-		const { username, email, name, avatar } = await this.model.create(user);
-		return { username, email, name, avatar };
+		user.password = await this.hashPassword(user.password);
+		const { username, email, name, avatar, _id } = await this.model.create(user);
+		return { username, email, name, avatar, id: _id };
 	}
 
-	async update(user: Partial<User>) {
-		return this.model.updateOne({ username: user.username }, user);
+	async update(userId: string, user: Partial<User>) {
+		if (user.password) {
+			user.password = await this.hashPassword(user.password);
+		}
+		return this.model.findByIdAndUpdate(userId, user);
 	}
 
 	async delete(user: User) {
@@ -39,6 +44,26 @@ export class UserDao extends Dao {
 
 	async find(username: string) {
 		const dbModel = await this.model.findOne({ username });
-		return User.from(dbModel);
+		return dbModel ? User.from({ ...dbModel, id: dbModel._id }) : null;
+	}
+
+	async findAndCheckPassword(username: string, password?: string) {
+		const dbModel = await this.model.findOne({ username });
+		if (dbModel && (await bcrypt.compare(password || '', dbModel.password))) {
+			return User.from({ ...dbModel, id: dbModel._id });
+		}
+		return null;
+	}
+
+	/**
+	 * Salts and hashes the password before storing it in the database
+	 */
+	private async hashPassword(password: string): Promise<string> {
+		return await bcrypt.hash(password, 10);
+	}
+
+	async findById(id: string) {
+		const dbModel = await this.model.findById(id);
+		return dbModel ? User.from(dbModel) : null;
 	}
 }

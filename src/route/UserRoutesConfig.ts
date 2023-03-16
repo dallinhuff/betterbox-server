@@ -43,6 +43,7 @@ export class UserRoutesConfig extends RoutesConfig {
 		// followers
 		const followersEndpoint = `${this.baseUrl}/followers/:username`;
 		this.app
+			.use(followersEndpoint, AuthParser)
 			.route(followersEndpoint)
 			.get(UserController.getFollowers)
 			.post(UserController.follow)
@@ -50,7 +51,10 @@ export class UserRoutesConfig extends RoutesConfig {
 
 		// following
 		const followingEndpoint = `${this.baseUrl}/following/:username`;
-		this.app.route(followingEndpoint).get(UserController.getFollowing);
+		this.app
+			.use(followingEndpoint, AuthParser)
+			.route(followingEndpoint)
+			.get(UserController.getFollowing);
 
 		// feed
 		const feedEndpoint = `${this.baseUrl}/feed`;
