@@ -4,6 +4,7 @@ export class Review {
 	rating: number;
 	liked: boolean;
 	body: string;
+	timestamp: number;
 	numLikes: number;
 	id?: string;
 
@@ -13,6 +14,7 @@ export class Review {
 		rating: number,
 		liked?: boolean,
 		body?: string,
+		timestamp?: number,
 		numLikes?: number,
 		id?: string
 	) {
@@ -21,6 +23,7 @@ export class Review {
 		this.rating = rating;
 		this.liked = liked || false;
 		this.body = body || '';
+		this.timestamp = timestamp || Date.now();
 		this.numLikes = numLikes || 0;
 		this.id = id;
 	}
@@ -32,6 +35,7 @@ export class Review {
 			review.rating,
 			review.liked,
 			review.body,
+			review.timestamp,
 			review.numLikes,
 			review.id
 		);

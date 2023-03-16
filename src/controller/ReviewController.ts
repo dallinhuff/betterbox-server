@@ -1,4 +1,6 @@
 import { Handler } from 'express';
+import { PostReviewRequest } from '../request/PostReviewRequest';
+import { ReviewService } from '../service/ReviewService';
 
 export const getByUser: Handler = async (req, res) => {
 	res.status(200).send('reviews by user');
@@ -9,7 +11,16 @@ export const getByMovie: Handler = async (req, res) => {
 };
 
 export const postReview: Handler = async (req, res) => {
-	res.status(200).send('new review');
+	const request = new PostReviewRequest(
+		req.authToken!,
+		req.userId!,
+		req.body.movieId,
+		req.body.rating,
+		req.body.liked,
+		req.body.body
+	);
+	const response = await new ReviewService().postReview(request);
+	res.status(response.status).send(response);
 };
 
 export const editReview: Handler = async (req, res) => {

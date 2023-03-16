@@ -1,6 +1,7 @@
 import { Application } from 'express';
 import { RoutesConfig } from './RoutesConfig';
 import controller from '../controller/ReviewController';
+import AuthParser from '../middleware/AuthParser';
 
 /**
  * Route configuration class for Review-related API endpoints
@@ -12,26 +13,46 @@ export class ReviewRoutesConfig extends RoutesConfig {
 
 	configureRoutes(): Application {
 		// get by user
-		this.app.route(`${this.baseUrl}/user/:username`).get(controller.getByUser);
+		const byUserEndpoint = `${this.baseUrl}/user/:username`;
+		this.app
+			.use(byUserEndpoint, AuthParser)
+			.route(byUserEndpoint)
+			.get(controller.getByUser);
 
 		// get by movie
-		this.app.route(`${this.baseUrl}/movie/:movieId`).get(controller.getByMovie);
+		const byMovieEndpoint = `${this.baseUrl}/movie/:movieId`;
+		this.app
+			.use(byMovieEndpoint, AuthParser)
+			.route(byMovieEndpoint)
+			.get(controller.getByMovie);
 
 		// write a new review
-		this.app.route(`${this.baseUrl}`).post(controller.postReview);
+		const writeReviewEndpoint = `${this.baseUrl}`;
+		this.app
+			.use(writeReviewEndpoint, AuthParser)
+			.route(writeReviewEndpoint)
+			.post(controller.postReview);
 
 		// edit or delete an existing review
+		const editDelEndpoint = `${this.baseUrl}/:reviewId`;
 		this.app
-			.route(`${this.baseUrl}/:reviewId`)
+			.use(editDelEndpoint, AuthParser)
+			.route(editDelEndpoint)
 			.patch(controller.editReview)
 			.delete(controller.deleteReview);
 
 		// like a review
-		this.app.route(`${this.baseUrl}/like/:reviewId`).put(controller.likeReview);
+		const likeEndpoint = `${this.baseUrl}/like/:reviewId`;
+		this.app
+			.use(likeEndpoint, AuthParser)
+			.route(likeEndpoint)
+			.put(controller.likeReview);
 
 		// unlike a review
+		const unlikeEndpoint = `${this.baseUrl}/unlike/:reviewId`;
 		this.app
-			.route(`${this.baseUrl}/unlike/:reviewId`)
+			.use(unlikeEndpoint, AuthParser)
+			.route(unlikeEndpoint)
 			.put(controller.unlikeReview);
 
 		return this.app;
