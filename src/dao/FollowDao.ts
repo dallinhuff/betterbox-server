@@ -24,15 +24,8 @@ export class FollowDao extends Dao {
 		return this.model.deleteOne({ followee, follower });
 	}
 
-	async delete(follow: string, follower: string) {
-		return this.model.deleteOne({
-			follow: follow,
-			follower: follower,
-		});
-	}
-
 	async followers(follow: string, page: number) {
-		this.model
+		return this.model
 			.find({
 				where: {
 					follow: follow,
@@ -43,7 +36,7 @@ export class FollowDao extends Dao {
 	}
 
 	async following(follower: string, page: number) {
-		this.model
+		return this.model
 			.find({
 				where: {
 					follower: follower,

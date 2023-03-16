@@ -76,14 +76,18 @@ export const remove: Handler = async (req, res) => {
  * get a page of followers for a given user
  */
 export const getFollowers: Handler = async (req, res) => {
-	res.status(200).send('followers');
+	const page = parseInt(req.query.p as string);
+	const response = await new FollowService().following(req.userId!, page);
+	res.status(response.status).send(response);
 };
 
 /**
  * get a page of followees for a given user
  */
 export const getFollowing: Handler = async (req, res) => {
-	res.status(200).send('following');
+	const page = parseInt(req.query.p as string);
+	const response = await new FollowService().following(req.userId!, page);
+	res.status(response.status).send(response);
 };
 
 /**
@@ -101,7 +105,11 @@ export const follow: Handler = async (req, res) => {
  * unfollow a given user as a logged-in user
  */
 export const unfollow: Handler = async (req, res) => {
-	res.status(200).send('unfollow');
+	const response = await new FollowService().unfollow(
+		req.userId!,
+		req.params.username
+	);
+	res.status(response.status).send(response);
 };
 
 /**
