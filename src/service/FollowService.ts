@@ -3,6 +3,8 @@ import { Response } from '../response/Response';
 import { FollowPageResponse } from '../response/FollowPageResponse';
 import { FollowDao } from '../dao/FollowDao';
 import { UserDao } from '../dao/UserDao';
+import { User } from '../model/User';
+import { use } from 'chai';
 
 export class FollowService extends Service {
 	create(model: any): Promise<any> {
@@ -57,7 +59,16 @@ export class FollowService extends Service {
 			for (let i = 0; i < following.length; i++) {
 				const user = await userDao.findById(following[i].follower);
 				if (user != null) {
-					followingUsers.push(user);
+					followingUsers.push(
+						new User(
+							user.username,
+							'',
+							'',
+							user.name,
+							user.avatar,
+							user.id
+						)
+					);
 				}
 			}
 			return FollowPageResponse.success(followingUsers);
@@ -75,7 +86,16 @@ export class FollowService extends Service {
 			for (let i = 0; i < followers.length; i++) {
 				const user = await userDao.findById(followers[i].followee);
 				if (user != null) {
-					followersUsers.push(user);
+					followersUsers.push(
+						new User(
+							user.username,
+							'',
+							'',
+							user.name,
+							user.avatar,
+							user.id
+						)
+					);
 				}
 			}
 			return FollowPageResponse.success(followersUsers);
