@@ -10,7 +10,6 @@ export class FollowService extends Service {
 	}
 
 	async follow(userId: string, targetUsername: string): Promise<Response> {
-		console.log('INNNN FOllow');
 		const userDao = new UserDao();
 		const followDao = new FollowDao();
 		const targetUserId = (await userDao.find(targetUsername))?.id;
@@ -50,9 +49,38 @@ export class FollowService extends Service {
 	}
 
 	async following(userId: string, page: any): Promise<FollowPageResponse> {
-		const followDao = new FollowDao();
-		const following = await followDao.following(userId, page);
-		console.log(following);
-		return FollowPageResponse.error(400, 'testing');
+		try {
+			const followDao = new FollowDao();
+			const userDao = new UserDao();
+			const following = await followDao.following(userId, page);
+			const followingUsers = [];
+			for (let i = 0; i < following.length; i++) {
+				const user = await userDao.findById(following[i].follower);
+				if (user != null) {
+					followingUsers.push(user);
+				}
+			}
+			return FollowPageResponse.success(followingUsers);
+		} catch (e) {
+			return FollowPageResponse.error(500, `Internal server error: ${e}`);
+		}
+	}
+
+	async followers(userId: string, page: any): Promise<FollowPageResponse> {
+		try {
+			const followDao = new FollowDao();
+			const userDao = new UserDao();
+			const followers = await followDao.followers(userId, page);
+			const followersUsers = [];
+			for (let i = 0; i < followers.length; i++) {
+				const user = await userDao.findById(followers[i].followee);
+				if (user != null) {
+					followersUsers.push(user);
+				}
+			}
+			return FollowPageResponse.success(followersUsers);
+		} catch (e) {
+			return FollowPageResponse.error(500, `Internal server error: ${e}`);
+		}
 	}
 }

@@ -24,23 +24,19 @@ export class FollowDao extends Dao {
 		return this.model.deleteOne({ followee, follower });
 	}
 
-	async followers(follow: string, page: number) {
-		return this.model
+	async following(followee: string, page: number) {
+		return await this.model
 			.find({
-				where: {
-					follow: follow,
-				},
+				followee: followee,
 			})
 			.skip(page * this.followersPerPage)
 			.limit(this.followersPerPage);
 	}
 
-	async following(follower: string, page: number) {
-		return this.model
+	async followers(follower: string, page: number) {
+		return await this.model
 			.find({
-				where: {
-					follower: follower,
-				},
+				follower: follower,
 			})
 			.skip(page * this.followersPerPage)
 			.limit(this.followersPerPage);

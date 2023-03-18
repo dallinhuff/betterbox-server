@@ -77,7 +77,7 @@ export const remove: Handler = async (req, res) => {
  */
 export const getFollowers: Handler = async (req, res) => {
 	const page = parseInt(req.query.p as string);
-	const response = await new FollowService().following(req.userId!, page);
+	const response = await new FollowService().followers(req.userId!, page);
 	res.status(response.status).send(response);
 };
 
