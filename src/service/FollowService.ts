@@ -55,22 +55,8 @@ export class FollowService extends Service {
 			const followDao = new FollowDao();
 			const userDao = new UserDao();
 			const following = await followDao.following(userId, page);
-			const followingUsers = [];
-			for (let i = 0; i < following.length; i++) {
-				const user = await userDao.findById(following[i].follower);
-				if (user != null) {
-					followingUsers.push(
-						new User(
-							user.username,
-							'',
-							'',
-							user.name,
-							user.avatar,
-							user.id
-						)
-					);
-				}
-			}
+			const followIDS = following.map((id) => id.follower);
+			const followingUsers = await userDao.findByArray(followIDS);
 			return FollowPageResponse.success(followingUsers);
 		} catch (e) {
 			return FollowPageResponse.error(500, `Internal server error: ${e}`);
@@ -82,22 +68,8 @@ export class FollowService extends Service {
 			const followDao = new FollowDao();
 			const userDao = new UserDao();
 			const followers = await followDao.followers(userId, page);
-			const followersUsers = [];
-			for (let i = 0; i < followers.length; i++) {
-				const user = await userDao.findById(followers[i].followee);
-				if (user != null) {
-					followersUsers.push(
-						new User(
-							user.username,
-							'',
-							'',
-							user.name,
-							user.avatar,
-							user.id
-						)
-					);
-				}
-			}
+			const followIDS = followers.map((id) => id.followee);
+			const followersUsers = await userDao.findByArray(followIDS);
 			return FollowPageResponse.success(followersUsers);
 		} catch (e) {
 			return FollowPageResponse.error(500, `Internal server error: ${e}`);

@@ -1,7 +1,8 @@
 import { Dao } from './Dao';
-import { Schema } from 'mongoose';
+import { ObjectId, Schema } from 'mongoose';
 import { User } from '../model/User';
 import bcrypt from 'bcrypt';
+import { use } from 'chai';
 
 const UserSchema = new Schema({
 	username: String,
@@ -65,5 +66,16 @@ export class UserDao extends Dao {
 	async findById(id: string) {
 		const dbModel = await this.model.findById(id);
 		return dbModel ? User.from(dbModel) : null;
+	}
+
+	async findByArray(ids: Array<String>) {
+		console.log(ids);
+		const dbModels = await await this.model.find({
+			_id: { $in: ids },
+		});
+		return dbModels.map(
+			(user) =>
+				new User(user.username, '', '', user.name, user.avatar, user.id)
+		);
 	}
 }
