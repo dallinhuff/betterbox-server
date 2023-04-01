@@ -2,7 +2,6 @@ import { Dao } from './Dao';
 import { ObjectId, Schema } from 'mongoose';
 import { User } from '../model/User';
 import bcrypt from 'bcrypt';
-import { use } from 'chai';
 
 const UserSchema = new Schema({
 	username: String,

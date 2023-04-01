@@ -3,8 +3,6 @@ import { Response } from '../response/Response';
 import { FollowPageResponse } from '../response/FollowPageResponse';
 import { FollowDao } from '../dao/FollowDao';
 import { UserDao } from '../dao/UserDao';
-import { User } from '../model/User';
-import { use } from 'chai';
 
 export class FollowService extends Service {
 	create(model: any): Promise<any> {
